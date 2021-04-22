@@ -209,7 +209,10 @@ instance ToJSVal EChartSeries where
   toJSVal = toJSVal_generic (drop $ T.length "_eChartSeries_")
 
 toEChartSeries :: Some SeriesT -> JSM EChartSeries
-toEChartSeries (Some.This st) = def
+toEChartSeries sst = Some.withSomeM (pure sst) $ \st ->
+  let s = getSeries st
+  in
+    def
   -- common options
     { _eChartSeries_type = Just $ getSeriesType st
     , _eChartSeries_id = _series_id s
@@ -363,9 +366,6 @@ toEChartSeries (Some.This st) = def
   >>= eChartSeries_axisLabel %%~ (const $ series_axisLabel_toJSVal st)
   >>= eChartSeries_pointer %%~ (const $ series_pointer_toJSVal st)
   >>= eChartSeries_details %%~ (const $ series_details_toJSVal st)
-  where
-    s = getSeries st
-
 
 series_coordinateSystem_toJSVal :: SeriesT s -> JSM (Maybe JSVal)
 series_coordinateSystem_toJSVal = \case
