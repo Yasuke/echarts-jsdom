@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module ECharts
   ( initECharts
   , setOption
@@ -7,7 +9,8 @@ module ECharts
   , onRenderedAction
   , onFinishedAction
   , module X
-  , ECharts
+  , ECharts(..)
+  , EChartOpts(..)
   )
   where
 
@@ -20,20 +23,38 @@ import ECharts.Internal.EChartSeries
 
 import Control.Monad (void)
 import qualified Data.Text as T
-import Language.Javascript.JSaddle (eval, call, function, fun, toJSVal)
+import Language.Javascript.JSaddle ( eval
+                                   , call
+                                   , function
+                                   , fun
+                                   , toJSVal
+                                   , obj
+                                   , (<#)
+                                   )
 import GHCJS.DOM.Types (Element)
 import Data.Some (Some)
-import GHCJS.DOM.EventM
 import GHCJS.DOM.Types
-import GHCJS.DOM.EventTargetClosures
 
 data ECharts = ECharts { unECharts :: JSVal }
 
-initECharts :: GHCJS.DOM.Types.Element -> JSM ECharts
-initECharts e = do
-  f <- eval $ T.pack "(function(e) { return echarts['init'](e) })"
+data EChartOpts =
+  EChartOpts { _echartsOpts_size :: (Int, Int) -- ^ Width and Height in pixels
+             }
+  deriving (Eq, Show)
+
+echartOptsToObj :: EChartOpts -> JSM JSVal
+echartOptsToObj (EChartOpts (w,h)) = do
+  opts <- obj
+  _ <- (opts <# ("width" :: JSString)) w
+  _ <- (opts <# ("height" :: JSString)) h
+  toJSVal opts
+
+initECharts :: GHCJS.DOM.Types.Element -> EChartOpts -> JSM ECharts
+initECharts e opts = do
+  f <- eval $ T.pack "(function(e, o) { return echarts['init'](e, null, o) })"
   arg <- toJSVal e
-  ECharts <$> call f f [arg]
+  o <- echartOptsToObj opts
+  ECharts <$> call f f [arg, o]
 
 setOption :: ECharts -> ChartOptions -> JSM ()
 setOption c opts = do

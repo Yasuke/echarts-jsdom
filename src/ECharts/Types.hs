@@ -38,6 +38,11 @@ utcTimeToEpoch t = round $ (utcTimeToPOSIXSeconds t * 1000)
 ffor :: Functor f => f a -> (a -> b) -> f b
 ffor = flip fmap
 
+-- | Options api explained:  https://echarts.apache.org/en/api.html#echarts
+data ChartOpts =
+  ChartOpts {
+            }
+
 data Target = Target_Blank
             | Target_Self
 

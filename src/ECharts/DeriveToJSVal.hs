@@ -14,7 +14,7 @@ module ECharts.DeriveToJSVal (toJSVal_generic, ToJSVal(..)) where
 import GHC.Generics
 import qualified Data.Text as T
 
-import Language.Javascript.JSaddle
+import Language.Javascript.JSaddle hiding (obj)
 -- import GHCJS.Marshal.Internal (toJSVal_generic)
 import qualified Language.Javascript.JSaddle.Object as OI (Object(..), create, setProp)
 import qualified JavaScript.Array.Internal as AI (SomeJSArray(..), create, push)
